@@ -3,246 +3,275 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Simulador SCOMP</title>
 
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
 <style>
-:root{
-  --primary:#0a2540;
-  --secondary:#2c7be5;
-  --accent:#00b894;
-}
-
-body{
-  background:#eef2f7;
-}
-
-/* ✅ accesibilidad */
-.modo-mayor{
-  font-size:1.3rem;
-}
-
-.modo-mayor input,
-.modo-mayor select,
-.modo-mayor button{
-  font-size:1.2rem;
-  padding:10px;
-}
-
-.card{
-  border:none;
-  border-radius:20px;
-  box-shadow:0 12px 30px rgba(0,0,0,0.08);
-}
-
-h1,h2,h3,h4{
-  color:var(--primary);
-}
-
-.btn-primary{ background:var(--secondary); border:none; }
-.btn-success{ background:var(--accent); border:none; }
-
-.resultado-box{
-  background:#f8fafc;
-  padding:20px;
-  border-radius:15px;
-  margin-top:15px;
-}
-
-input, select{ margin-bottom:8px; }
+body { background: linear-gradient(135deg,#eef2f7,#dbeafe); font-family:sans-serif; }
+.card { border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); margin-bottom:20px;}
+h1,h4 { font-weight: bold; }
+button { border-radius:12px; }
+.resultado-box{ background:#f8fafc; padding:15px; border-radius:15px; margin-top:10px;}
+.modo-mayor h1 { font-size:2.8rem; }
+.modo-mayor label, .modo-mayor p { font-size:1.4rem; }
+.modo-mayor input, .modo-mayor select, .modo-mayor button { font-size:1.3rem; }
 </style>
 </head>
 
 <body>
 
-<main class="container py-4" id="app">
+<div class="container py-4" id="app">
 
 <!-- HEADER -->
-<header class="card p-4 mb-4 text-center">
-<h1><i class="fas fa-chart-line"></i> Simulador SCOMP</h1>
-<p>Calcula y compara tu mejor opción de pensión</p>
-
-<button class="btn btn-dark mt-2" onclick="toggleModoMayor()">
-👵 Modo Adulto Mayor
-</button>
-</header>
-
-<!-- INFO -->
-<section class="card p-4 mb-4">
-<h2>¿Qué es SCOMP?</h2>
-
-<article>
-<p>
-Sistema que permite comparar ofertas de pensión entre AFP y compañías de seguros.
-</p>
-</article>
-
-<article>
-<h4>Rol del sistema</h4>
-<p>
-Entrega información clara, transparente y comparable para tomar decisiones.
-</p>
-</article>
-
-<article>
-<h4>Protección de datos</h4>
-<p>
-Cumple con la Ley 19.628 sobre protección de datos personales.
-</p>
-</article>
-</section>
+<div class="card p-4 text-center">
+<h1>Sistema SCOMP</h1>
+<p>Simulación de pensiones en Chile</p>
+<button class="btn btn-dark" onclick="toggleModoMayor()">Modo Adulto Mayor</button>
+</div>
 
 <!-- DATOS -->
-<section class="card p-4 mb-4">
-<h2><i class="fas fa-user"></i> Datos</h2>
-
-<input class="form-control" id="nombre" placeholder="Nombre">
-<input class="form-control" id="apellido" placeholder="Apellido">
-<input class="form-control" id="rut" placeholder="12345678-9">
-</section>
+<div class="card p-4">
+<h4>Datos personales</h4>
+<input class="form-control mb-2" id="nombre" placeholder="Nombre">
+<input class="form-control mb-2" id="apellido" placeholder="Apellido">
+<input class="form-control mb-2" id="rut" placeholder="12345678-9">
+</div>
 
 <!-- SIMULADOR -->
-<section class="card p-4">
+<div class="card p-4">
+<h4>Simulador de pensión</h4>
 
-<h2><i class="fas fa-calculator"></i> Simulación</h2>
-
-<label>Años de pensión</label>
-<input type="number" id="expectativa" class="form-control">
+<label>Años</label>
+<input type="number" id="expectativa" class="form-control mb-2" placeholder="Ingrese años">
 
 <label>Valor UF</label>
-<input type="number" id="uf" class="form-control" readonly>
+<input type="number" id="uf" class="form-control mb-3" readonly>
 
 <div id="opciones"></div>
 
-<button class="btn btn-secondary mt-2" onclick="agregarOpcion()">
-➕ Agregar opción
-</button>
-
-<button class="btn btn-primary mt-2" onclick="calcular()">
-🧮 Calcular
-</button>
-
-<button class="btn btn-success mt-2" onclick="descargarPDF()">
-📄 Descargar PDF
-</button>
+<button class="btn btn-secondary" onclick="agregarOpcion()">Agregar opción</button>
+<button class="btn btn-primary" onclick="calcular()">Calcular</button>
+<button class="btn btn-success mt-2" onclick="descargarPDF()">Descargar PDF</button>
 
 <div id="resultado"></div>
+<canvas id="grafico" class="mt-3"></canvas>
+</div>
 
-<canvas id="grafico" class="mt-4"></canvas>
+<!-- INFORMACIÓN SCOMP -->
+<div class="card p-4">
+<h4>¿Qué es SCOMP?</h4>
+<p>
+El Sistema de Consultas y Ofertas de Montos de Pensión (SCOMP) entrega información completa y comparable respecto de las ofertas de Renta Vitalicia y los montos de pensión en Retiro Programado, mediante una plataforma tecnológica confiable que conecta a las AFP, Compañías de Seguros de Vida y Asesores Previsionales con los Afiliados al Sistema de Pensiones en Chile.
+</p>
+<p>
+SCOMP resguarda la privacidad de los afiliados según la Ley N° 19.628.  
+<a href="https://www.scomp.cl/index.html" target="_blank">Más información</a>
+</p>
+</div>
 
-</section>
-
-<footer class="text-center mt-4">
-<p>Simulación referencial SCOMP</p>
-</footer>
-
-</main>
+</div>
 
 <script>
 let chart;
 
-// 🔹 modo adulto mayor
 function toggleModoMayor(){
-document.getElementById("app").classList.toggle("modo-mayor");
+  document.getElementById("app").classList.toggle("modo-mayor");
 }
 
-// UF
+// Obtener UF
 async function obtenerUF(){
-let r=await fetch("https://mindicador.cl/api/uf");
-let d=await r.json();
-document.getElementById("uf").value=Math.round(d.serie[0].valor);
+  try{
+    let r=await fetch("https://mindicador.cl/api/uf");
+    let d=await r.json();
+    document.getElementById("uf").value=Math.round(d.serie[0].valor);
+  }catch(e){
+    console.error("Error UF:", e);
+    document.getElementById("uf").value=37000;
+  }
 }
 obtenerUF();
 
-// opciones
+// Agregar opción
 function agregarOpcion(){
-let div=document.createElement("div");
-div.className="border p-2 mb-2 rounded";
+  let div=document.createElement("div");
+  div.className="border p-2 mb-2";
 
-div.innerHTML=`
-<select class="form-control tipo" onchange="toggleTipo(this)">
-<option value="fija">Fija</option>
-<option value="variable">Variable</option>
-</select>
+  div.innerHTML=`
+  <select class="form-control tipo" onchange="toggle(this)">
+    <option value="fija">Fija</option>
+    <option value="variable">Variable</option>
+  </select>
 
-<input type="number" class="form-control monto" placeholder="Monto UF">
+  <label>Monto (UF)</label>
+  <input type="number" class="form-control monto">
+  
+  <label>Aumento (porcentaje)</label>
+  <input type="number" class="form-control aumento" disabled>
 
-<input type="number" class="form-control aumento" placeholder="% aumento" disabled>
+  <label>Meses aumento</label>
+  <input type="number" class="form-control meses" disabled>
+  `;
 
-<input type="number" class="form-control meses" placeholder="Meses aumento" disabled>
-`;
-
-document.getElementById("opciones").appendChild(div);
+  document.getElementById("opciones").appendChild(div);
 }
 
-// bloqueo
-function toggleTipo(select){
-let contenedor = select.parentElement;
-let aumento = contenedor.querySelector(".aumento");
-let meses = contenedor.querySelector(".meses");
-
-if(select.value==="fija"){
-aumento.disabled=true;
-meses.disabled=true;
-aumento.value="";
-meses.value="";
-}else{
-aumento.disabled=false;
-meses.disabled=false;
-}
+// Toggle fija/variable
+function toggle(sel){
+  let d=sel.parentElement;
+  let a=d.querySelector(".aumento");
+  let m=d.querySelector(".meses");
+  if(sel.value=="fija"){ a.disabled=true; m.disabled=true; } 
+  else{ a.disabled=false; m.disabled=false; }
 }
 
-// cálculo backend (igual que antes)
+// Validar RUT
+function validarRUT(rut){ return /^[0-9]+-[0-9kK]{1}$/.test(rut); }
+
+// Validar campos antes de enviar
+function validarCampos(data){
+  if(!data.nombre || !data.apellidos){ alert("Nombre y apellido obligatorios"); return false; }
+  if(!validarRUT(data.rut)){ alert("RUT inválido"); return false; }
+  if(!data.expectativa || data.expectativa<=0){ alert("Años inválidos"); return false; }
+  if(data.opciones.length<1){ alert("Agregue opciones"); return false; }
+  return true;
+}
+
+// Calcular
 async function calcular(){
-let ops=[];
+  let ops=[];
+  document.querySelectorAll("#opciones>div").forEach(o=>{
+    ops.push({
+      tipo:o.querySelector(".tipo").value,
+      monto:parseFloat(o.querySelector(".monto").value),
+      aumento:parseFloat(o.querySelector(".aumento").value) || 0,
+      meses:parseInt(o.querySelector(".meses").value) || 0
+    });
+  });
 
-document.querySelectorAll("#opciones>div").forEach(o=>{
-ops.push({
-tipo:o.querySelector(".tipo").value,
-monto:parseFloat(o.querySelector(".monto").value),
-aumento:parseFloat(o.querySelector(".aumento").value)||0,
-meses:parseInt(o.querySelector(".meses").value)||0
-});
-});
+  let data={
+    nombre:document.getElementById("nombre").value,
+    apellidos:document.getElementById("apellido").value,
+    rut:document.getElementById("rut").value,
+    expectativa:parseInt(document.getElementById("expectativa").value) * 12, // convertir a meses
+    valorUF:parseFloat(document.getElementById("uf").value),
+    opciones:ops
+  };
 
-let anios=parseInt(document.getElementById("expectativa").value);
+  if(!validarCampos(data)) return;
 
-let data={
-nombre:document.getElementById("nombre").value,
-apellidos:document.getElementById("apellido").value,
-rut:document.getElementById("rut").value,
-expectativa:anios*12,
-valorUF:parseFloat(document.getElementById("uf").value),
-opciones:ops
-};
+  // Backend
+  try{
+    let res=await fetch("http://127.0.0.1:5000/calcular",{
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(data)
+    });
 
-let res=await fetch("http://127.0.0.1:5000/calcular",{
-method:"POST",
-headers:{"Content-Type":"application/json"},
-body:JSON.stringify(data)
-});
+    if(!res.ok){
+      let err = await res.json();
+      alert(err.error || "Error en servidor");
+      return;
+    }
 
-let resultado=await res.json();
+    let resultado = await res.json();
 
-let html=`<div class="resultado-box">`;
-html+=`<h5>✔ Mejor opción: ${resultado.mejor_opcion+1}</h5>`;
-html+=`</div>`;
+    mostrarResultado(resultado,data);
+    generarGrafico(data);
 
-document.getElementById("resultado").innerHTML=html;
+  }catch(e){
+    alert("Error de conexión con el servidor");
+    console.error(e);
+  }
 }
 
+// Generar series
+function generarSeries(data){
+  return data.opciones.map(op=>{
+    let acum=0, arr=[];
+    for(let i=1;i<=data.expectativa;i++){
+      let v=op.monto;
+      if(op.tipo=="variable" && i<=op.meses){ v=v*(1+op.aumento/100); }
+      acum+=v;
+      arr.push(acum*data.valorUF);
+    }
+    return arr;
+  });
+}
+
+// Detectar cruce
+function detectarCruce(series){
+  if(series.length<2) return null;
+  for(let i=0;i<series[0].length;i++){
+    let base=series[0][i];
+    for(let j=1;j<series.length;j++){
+      if(series[j][i]>base){ return {mes:i,valor:series[j][i]}; }
+    }
+  }
+  return null;
+}
+
+// Generar gráfico
+function generarGrafico(data){
+  let series=generarSeries(data);
+  let cruce=detectarCruce(series);
+  if(chart) chart.destroy();
+
+  let labels=Array.from({length:data.expectativa},(_,i)=>i+1);
+
+  chart=new Chart(document.getElementById("grafico"),{
+    type:'line',
+    data:{
+      labels,
+      datasets:series.map((s,i)=>({
+        label:`Opción ${i+1}`,
+        data:s,
+        fill:true,
+        tension:0.3
+      }))
+    },
+    options:{
+      responsive:true,
+      plugins:{
+        legend:{ position:'top' },
+        tooltip:{ callbacks:{ label:(ctx)=>"$"+ctx.raw.toLocaleString() } }
+      },
+      scales:{ y:{ ticks:{ callback:(v)=>"$"+v.toLocaleString() } } }
+    }
+  });
+
+  if(cruce){
+    chart.data.datasets.push({
+      label:'Intersección',
+      data:labels.map((_,i)=> i===cruce.mes ? cruce.valor : null),
+      type:'scatter',
+      pointRadius:8
+    });
+    chart.update();
+  }
+}
+
+// Mostrar resultado
+function mostrarResultado(res,data){
+  let html=`<div class="resultado-box"><strong>Mejor opción:</strong> ${res.mejor_opcion+1}<br>`;
+  res.todas.forEach((t,i)=>{ html+=`Opción ${i+1}: $${(t*data.valorUF).toLocaleString()}<br>`; });
+  html+="</div>";
+  document.getElementById("resultado").innerHTML=html;
+}
+
+// Descargar PDF
 function descargarPDF(){
-const { jsPDF } = window.jspdf;
-const doc = new jsPDF();
-doc.text("Informe SCOMP",10,10);
-doc.save("informe.pdf");
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  let texto=document.getElementById("resultado").innerText;
+  doc.text("Resultados SCOMP",10,10);
+  doc.text(texto,10,30);
+  doc.save("resultado.pdf");
 }
 
+// Inicializar
 agregarOpcion();
 </script>
 
